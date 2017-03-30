@@ -48,27 +48,15 @@ def radsDegree(dx, dy):
 def obtener_punto(event, x, y, flags, param):
     if event == 4:
         center = [x, y]
-        if len(Circle.registry) < 2:
-            print 'me'
+        if len(Circle.registry) == 0:
+            # the first circle do not have an angle
             cv2.circle(img, (x, y), 5, (255, 0, 255), -1)
             Circle(x, y)
-            if len(Circle.registry) == 2:
-                dx = Circle.registry[-2].x - Circle.registry[-1].x
-                dy = Circle.registry[-2].y - Circle.registry[-1].y
-                degs = radsDegree(dx, dy)
-                output = None
-                if 180 <= degs < 360:
-                    output = degs - 180
-                elif 0 < degs < 180:
-                    output = degs + 180
-                elif degs == 360:
-                    output = 180
-                # print output
-                Circle.registry[-1].setDegree(output)
         else:
             dx = (center[0] - Circle.registry[-1].x)
             dy = (center[1] - Circle.registry[-1].y)
             degs = radsDegree(dx, dy)
+            print degs
             # NEW CIRCLE (actual)
             Circle(x, y)
             Circle.registry[-1].setDegree(degs)
@@ -78,31 +66,32 @@ def obtener_punto(event, x, y, flags, param):
             cv2.line(img, (Circle.registry[-2].x, Circle.registry[-2].y),
                      (Circle.registry[-1].x, Circle.registry[-1].y), (0, 255, 255), 1)
 
-            # get the last circle
             eval_degre = Circle.registry[-2].degrees
 
-            # set delimiters
-            abertura = 60
-            top = eval_degre + abertura
-            bot = eval_degre - abertura
-            top = getDegree(top)
-            bot = getDegree(bot)
-            print bot, degs, top
+            # the first circle donot have an angle, so its value is None
+            if eval_degre != None:
+                # set delimiters
+                abertura = 60
+                top = eval_degre + abertura
+                bot = eval_degre - abertura
+                top = getDegree(top)
+                bot = getDegree(bot)
+                print bot, degs, top
 
-            if (bot < top):
-                if bot <= degs and degs <= top:
+                if (bot < top):
+                    if bot <= degs and degs <= top:
+                        print 'correcto'
+                        cv2.circle(img, (x, y), 7, (255, 255, 255), 1)
+                    else:
+                        print 'eliminar'
+                        Circle.registry.pop(-1)
+
+                elif bot <= degs or degs <= top:
                     print 'correcto'
                     cv2.circle(img, (x, y), 7, (255, 255, 255), 1)
                 else:
                     print 'eliminar'
                     Circle.registry.pop(-1)
-
-            elif bot <= degs or degs <= top:
-                print 'correcto'
-                cv2.circle(img, (x, y), 7, (255, 255, 255), 1)
-            else:
-                print 'eliminar'
-                Circle.registry.pop(-1)
 
 
 while True:
